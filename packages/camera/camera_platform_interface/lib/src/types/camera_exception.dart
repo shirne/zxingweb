@@ -1,6 +1,11 @@
 abstract class CameraException implements Exception {
   const CameraException(this.description);
   final String description;
+
+  @override
+  String toString() {
+    return "Exception: $description";
+  }
 }
 
 class CameraUnknownException implements CameraException {

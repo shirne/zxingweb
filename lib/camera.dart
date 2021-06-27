@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:shirne_dialog/shirne_dialog.dart';
 
 import '../models/utils.dart';
 import '../widgets/cupertino_icon_button.dart';
@@ -17,8 +19,8 @@ class CameraPage extends StatefulWidget {
 
 const _videoConstraints = VideoConstraints(
   facingMode: FacingMode(
-    type: CameraType.rear,
-    constrain: Constrain.ideal,
+    type: CameraType.environment,
+    constrain: Constrain.exact,
   ),
   width: VideoSize(ideal: 1920, maximum: 1920),
   height: VideoSize(ideal: 1080, maximum: 1080),
@@ -69,18 +71,27 @@ class _CameraPageState extends State<CameraPage> {
     isDetecting = true;
     try {
       CameraImage pic = await _controller.takePicture();
+      Uint8List imageData = Uint8List.fromList(utf8.encode(pic.data));
+      ui.Image image =
+          (await (await ui.instantiateImageCodec(imageData)).getNextFrame())
+              .image;
 
       var results = await decodeImageInIsolate(
-          Uint8List.fromList(utf8.encode(pic.data)), pic.width, pic.height);
+          (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!
+              .buffer
+              .asUint8List(),
+          pic.width,
+          pic.height);
 
       if (results != null) {
         if (!mounted) return;
         Navigator.of(context).pushNamed('/result', arguments: results);
       } else {
-        print('detected nothing');
+        MyDialog.of(context).toast('detected nothing');
       }
-    } catch (_) {
-      print('can\'t take picture from camera');
+    } catch (err) {
+      MyDialog.of(context)
+          .toast('can\'t take picture from camera: ${err.toString()}');
     }
     isDetecting = false;
   }

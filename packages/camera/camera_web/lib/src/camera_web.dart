@@ -222,9 +222,9 @@ extension on html.VideoElement {
       ..setProperty('pointer-events', 'none')
       ..setProperty('width', '100%')
       ..setProperty('height', '100%')
-      ..setProperty('transform', 'scaleX(-1)')
-      ..setProperty('object-fit', 'cover')
-      ..setProperty('-webkit-transform', 'scaleX(-1)')
-      ..setProperty('-moz-transform', 'scaleX(-1)');
+      //..setProperty('transform', 'scaleX(-1)')
+      ..setProperty('object-fit', 'cover');
+    //..setProperty('-webkit-transform', 'scaleX(-1)')
+    //..setProperty('-moz-transform', 'scaleX(-1)');
   }
 }
