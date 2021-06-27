@@ -7,3 +7,6 @@ export 'package:camera_platform_interface/camera_platform_interface.dart';
 
 part 'src/camera.dart';
 part 'src/controller.dart';
+
+Future<List<MediaDeviceInfo>> availableCameras() =>
+    CameraPlatform.instance.getMediaDevices();

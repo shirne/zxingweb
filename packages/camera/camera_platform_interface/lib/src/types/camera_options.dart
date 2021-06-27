@@ -5,15 +5,21 @@ class CameraOptions {
   const CameraOptions({
     AudioConstraints? audio,
     VideoConstraints? video,
+    this.deviceId,
   })  : audio = audio ?? const AudioConstraints(),
         video = video ?? const VideoConstraints();
 
   final AudioConstraints audio;
   final VideoConstraints video;
+  final String? deviceId;
 
   Future<Map<String, dynamic>> toJson() async {
     final videoConstraints = await video.toJson();
-    return {'audio': audio.toJson(), 'video': videoConstraints};
+    return {
+      'audio': audio.toJson(),
+      'video': videoConstraints,
+      if (deviceId != null) 'deviceId': deviceId,
+    };
   }
 }
 

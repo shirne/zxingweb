@@ -19,7 +19,7 @@ class CameraPlugin extends CameraPlatform {
   }
 
   final _cameras = <int, Camera>{};
-  var _textureCounter = 1;
+  var _textureCounter = 0;
 
   @visibleForTesting
   html.Window? window;

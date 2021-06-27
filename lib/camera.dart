@@ -28,14 +28,11 @@ const _videoConstraints = VideoConstraints(
 );
 
 class _CameraPageState extends State<CameraPage> {
-  final _controller = CameraController(
-    options: const CameraOptions(
-      audio: AudioConstraints(enabled: false),
-      video: _videoConstraints,
-    ),
-  );
+  late CameraController _controller;
   bool _detectedCamera = false;
+  bool _isCameraAvailable = false;
   bool isDetecting = false;
+  late List<MediaDeviceInfo> _cameras;
 
   @override
   void initState() {
@@ -43,16 +40,25 @@ class _CameraPageState extends State<CameraPage> {
     _initializeCameraController();
   }
 
-  bool get _isCameraAvailable =>
-      _controller.value.status == CameraStatus.available;
-
   Future<void> _initializeCameraController() async {
+    _cameras = await availableCameras();
+
+    if (_cameras.length < 1) {
+      setState(() {
+        _detectedCamera = true;
+      });
+      return;
+    }
+    _controller = CameraController(
+      options: CameraOptions(
+        audio: AudioConstraints(enabled: false),
+        deviceId: _cameras[0].deviceId,
+      ),
+    );
     await _controller.initialize();
     setState(() {
+      _isCameraAvailable = true;
       _detectedCamera = true;
-    });
-    _controller.getCameras().then((cameras){
-      print(cameras);
     });
     await _play();
   }
