@@ -25,21 +25,21 @@ packages:
   camera:
     dependency: "direct dev"
     description:
-      path: "../../flutter/photobooth/packages/camera/camera"
+      path: "packages/camera/camera"
       relative: true
     source: path
     version: "0.1.0"
   camera_platform_interface:
     dependency: transitive
     description:
-      path: "../../flutter/photobooth/packages/camera/camera_platform_interface"
+      path: "packages/camera/camera_platform_interface"
       relative: true
     source: path
     version: "0.0.1"
   camera_web:
     dependency: transitive
     description:
-      path: "../../flutter/photobooth/packages/camera/camera_web"
+      path: "packages/camera/camera_web"
       relative: true
     source: path
     version: "0.1.0"

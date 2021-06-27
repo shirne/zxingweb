@@ -17,7 +17,7 @@ class CameraPage extends StatefulWidget {
 
 const _videoConstraints = VideoConstraints(
   facingMode: FacingMode(
-    type: CameraType.user,
+    type: CameraType.rear,
     constrain: Constrain.ideal,
   ),
   width: VideoSize(ideal: 1920, maximum: 1920),
@@ -112,7 +112,7 @@ class _CameraPageState extends State<CameraPage> {
                     ),
                   ],
                 ),
-                error: (context, error) => Text(error.toString()),
+                error: (context, error) => Text(error.description),
               ),
       ),
     );

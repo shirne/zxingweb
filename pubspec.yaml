@@ -35,7 +35,7 @@ dev_dependencies:
   event_bus: ^2.0.0
   permission_handler: ^6.1.0
   camera: 
-    path: ../../flutter/photobooth/packages/camera/camera
+    path: ./packages/camera/camera
   file_picker: ^3.0.1
   file_selector: ^0.8.2
   file_selector_windows: ^0.0.2
