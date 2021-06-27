@@ -2,12 +2,12 @@ import 'package:buffer_image/buffer_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zxing_lib/client.dart';
-import 'package:zxing_lib/qrcode.dart';
+import 'package:zxing_lib/common.dart';
 
 import '../models/result_generator.dart';
 import '../widgets/list_tile_group.dart';
 import '../widgets/cupertino_list_tile.dart';
-import '../models/qrcode_style.dart';
+import '../models/code_type.dart';
 import '../widgets/type_picker.dart';
 import 'geo_form.dart';
 import 'sms_form.dart';
@@ -16,6 +16,7 @@ import 'wifi_form.dart';
 import 'text_form.dart';
 
 class IndexPage extends StatefulWidget {
+  const IndexPage({Key? key}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _IndexPageState();
 }
@@ -24,7 +25,8 @@ class _IndexPageState extends State<IndexPage> {
   ResultGenerator result = ResultGenerator.text;
   Map<ResultGenerator, Widget> forms = {};
   Map<ResultGenerator, ParsedResult> results = {};
-  QRCodeStyle style = QRCodeStyle.normal;
+  CodeType codeType = CodeType.qrcode;
+  int formatsIndex = 0;
 
   late BufferImage image;
   bool _isCreating = false;
@@ -40,11 +42,11 @@ class _IndexPageState extends State<IndexPage> {
   }
 
   setStyle() async {
-    QRCodeStyle? newStyle =
-        await pickerType<QRCodeStyle>(context, QRCodeStyle.values, style);
-    if (newStyle != null) {
+    CodeType? newType =
+        await pickerType<CodeType>(context, CodeType.values, codeType);
+    if (newType != null) {
       setState(() {
-        style = newStyle;
+        codeType = newType;
       });
     }
   }
@@ -92,43 +94,22 @@ class _IndexPageState extends State<IndexPage> {
     }
   }
 
-  Future<BufferImage> createQrcode(String content,
+  Future<BufferImage> createCode(String content,
       {int pixelSize = 0,
       Color bgColor = Colors.white,
       Color color = Colors.black}) async {
-    QRCode code = Encoder.encode(content);
-    print(content);
-    ByteMatrix matrix = code.matrix!;
-    if (pixelSize < 1) {
-      pixelSize = 350 ~/ matrix.width;
-    }
-    BufferImage image = BufferImage(matrix.width * pixelSize + pixelSize * 2,
-        matrix.height * pixelSize + pixelSize * 2);
+    BitMatrix matrix =
+        codeType.type.encode(content, codeType.formats[formatsIndex], 500, 500);
+
+    BufferImage image = BufferImage(matrix.width, matrix.height);
     image.drawRect(
         Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         bgColor);
-    BufferImage? blackImage = await style.blackBlock(pixelSize);
-    BufferImage? whiteImage = await style.whiteBlock(pixelSize);
+
     for (int x = 0; x < matrix.width; x++) {
       for (int y = 0; y < matrix.height; y++) {
-        if (matrix.get(x, y) == 1) {
-          if (blackImage != null) {
-            image.drawImage(
-              blackImage,
-              Offset(
-                (pixelSize + x * pixelSize).toDouble(),
-                (pixelSize + y * pixelSize).toDouble(),
-              ),
-            );
-          }
-        } else if (whiteImage != null) {
-          image.drawImage(
-            whiteImage,
-            Offset(
-              (pixelSize + x * pixelSize).toDouble(),
-              (pixelSize + y * pixelSize).toDouble(),
-            ),
-          );
+        if (matrix.get(x, y)) {
+          image.setColor(x, y, color);
         }
       }
     }
@@ -140,13 +121,13 @@ class _IndexPageState extends State<IndexPage> {
     _isCreating = true;
     var _result = results[result];
     if (_result != null) {
-      image = await createQrcode(result.generator(_result));
+      image = await createCode(result.generator(_result));
       showCupertinoDialog(
         context: context,
         barrierDismissible: true,
         builder: (context) {
           return CupertinoAlertDialog(
-            title: Text('qrcode'),
+            title: Text('barcode'),
             content: AspectRatio(
               aspectRatio: 1,
               child: Image(
@@ -191,8 +172,8 @@ class _IndexPageState extends State<IndexPage> {
                   ),
                   CupertinoListTile(
                     onTap: setStyle,
-                    title: Text('二维码样式'),
-                    trailing: Text(style.name),
+                    title: Text('码类型'),
+                    trailing: Text(codeType.name),
                     isLink: true,
                   ),
                 ],

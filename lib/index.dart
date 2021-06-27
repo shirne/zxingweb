@@ -9,6 +9,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import '../models/utils.dart';
+import 'generator/index.dart' as generator;
 import 'result.dart';
 import 'camera.dart';
 
@@ -22,6 +23,9 @@ class IndexPage extends StatelessWidget {
         switch (settings.name) {
           case '/camera':
             builder = (BuildContext context) => const CameraPage();
+            break;
+          case '/generator':
+            builder = (BuildContext context) => const generator.IndexPage();
             break;
           case '/result':
             builder = (BuildContext context) =>
@@ -48,8 +52,8 @@ class _IndexPageState extends State<_IndexPage> {
     Navigator.of(context).pushNamed('/camera');
   }
 
-  void openBinarizer() {
-    Navigator.of(context).pushNamed('/binarizer');
+  void openGenerator() {
+    Navigator.of(context).pushNamed('/generator');
   }
 
   void openFile() async {
@@ -137,9 +141,9 @@ class _IndexPageState extends State<_IndexPage> {
               height: 20,
             ),
             CupertinoButton.filled(
-              child: const Text('Binarizer'),
+              child: const Text('Generator'),
               onPressed: () {
-                openBinarizer();
+                openGenerator();
               },
             ),
             SizedBox(

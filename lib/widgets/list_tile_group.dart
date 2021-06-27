@@ -9,15 +9,15 @@ class ListTileGroup extends StatelessWidget {
   final double dividerIntent;
   final double dividerEndIntent;
 
-  const ListTileGroup(
-      {Key? key,
-      required this.children,
-      this.dividerWith = 0.5,
-      this.paddingBottom = 10,
-      this.dividerIntent = 20,
-      this.dividerEndIntent = 0,
-      this.dividerColor = CupertinoColors.lightBackgroundGray})
-      : super(key: key);
+  const ListTileGroup({
+    Key? key,
+    required this.children,
+    this.dividerWith = 0.5,
+    this.paddingBottom = 10,
+    this.dividerIntent = 20,
+    this.dividerEndIntent = 0,
+    this.dividerColor = CupertinoColors.lightBackgroundGray,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
