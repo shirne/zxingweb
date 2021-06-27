@@ -50,6 +50,8 @@ class CameraController extends ValueNotifier<CameraState> {
     }
   }
 
+  Future<List<MediaDeviceInfo>> getCameras() => _cameraPlatform.getMediaDevices();
+
   Future<void> play() => _cameraPlatform.play(_textureId);
   Future<void> stop() => _cameraPlatform.stop(_textureId);
 

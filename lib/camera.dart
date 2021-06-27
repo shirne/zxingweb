@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:zxing_lib/zxing.dart';
 import 'package:camera/camera.dart';
 import 'package:shirne_dialog/shirne_dialog.dart';
 
@@ -33,7 +34,7 @@ class _CameraPageState extends State<CameraPage> {
       video: _videoConstraints,
     ),
   );
-  bool detectedCamera = false;
+  bool _detectedCamera = false;
   bool isDetecting = false;
 
   @override
@@ -42,13 +43,19 @@ class _CameraPageState extends State<CameraPage> {
     _initializeCameraController();
   }
 
-  Future<void> _initializeCameraController() async {
-    await _controller.initialize();
-    await _play();
-  }
-
   bool get _isCameraAvailable =>
       _controller.value.status == CameraStatus.available;
+
+  Future<void> _initializeCameraController() async {
+    await _controller.initialize();
+    setState(() {
+      _detectedCamera = true;
+    });
+    _controller.getCameras().then((cameras){
+      print(cameras);
+    });
+    await _play();
+  }
 
   Future<void> _play() async {
     if (!_isCameraAvailable) return;
@@ -68,32 +75,37 @@ class _CameraPageState extends State<CameraPage> {
 
   onCameraView() async {
     if (isDetecting) return;
-    isDetecting = true;
-    try {
-      CameraImage pic = await _controller.takePicture();
-      Uint8List imageData = Uint8List.fromList(utf8.encode(pic.data));
-      ui.Image image =
-          (await (await ui.instantiateImageCodec(imageData)).getNextFrame())
-              .image;
+    setState(() {
+      isDetecting = true;
+    });
 
-      var results = await decodeImageInIsolate(
+    CameraImage pic = await _controller.takePicture();
+    Uint8List imageData = Uint8List.fromList(utf8.encode(pic.data));
+    ui.Image image =
+        (await (await ui.instantiateImageCodec(imageData)).getNextFrame())
+            .image;
+
+    List<Result>? results;
+    String error = '';
+    try {
+      results = await decodeImageInIsolate(
           (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!
               .buffer
               .asUint8List(),
           pic.width,
           pic.height);
-
-      if (results != null) {
-        if (!mounted) return;
-        Navigator.of(context).pushNamed('/result', arguments: results);
-      } else {
-        MyDialog.of(context).toast('detected nothing');
-      }
     } catch (err) {
-      MyDialog.of(context)
-          .toast('can\'t take picture from camera: ${err.toString()}');
+      error = ":${err.toString()}";
     }
-    isDetecting = false;
+    if (!mounted) return;
+    if (results != null) {
+      Navigator.of(context).pushNamed('/result', arguments: results);
+    } else {
+      MyDialog.of(context).toast('detected nothing $error');
+    }
+    setState(() {
+      isDetecting = false;
+    });
   }
 
   @override
@@ -103,8 +115,8 @@ class _CameraPageState extends State<CameraPage> {
         middle: Text('Camera'),
       ),
       child: Center(
-        child: _isCameraAvailable
-            ? Text(detectedCamera ? 'Not detected cameras' : 'Detecting')
+        child: !_isCameraAvailable
+            ? Text(_detectedCamera ? 'Not detected cameras' : 'Detecting')
             : Camera(
                 controller: _controller,
                 placeholder: (_) => const SizedBox(),
@@ -117,7 +129,14 @@ class _CameraPageState extends State<CameraPage> {
                     Align(
                       alignment: Alignment(0, 0.7),
                       child: CupertinoIconButton(
-                        icon: Icon(CupertinoIcons.qrcode_viewfinder),
+                        icon: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (isDetecting) CupertinoActivityIndicator(),
+                            Icon(CupertinoIcons.qrcode_viewfinder),
+                          ],
+                        ),
                         onPressed: onCameraView,
                       ),
                     ),
