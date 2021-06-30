@@ -1,6 +1,6 @@
 # ZXing-dart Web Demo
 
-This is a demo project to show how to use [zxing-dart](https://gitee.com/shirne/zxing-dart) in web project.
+This is a demo project to show how to use [zxing-dart](https://github.com/shirne/zxing-dart) in web project.
 
 ## Issues
 
