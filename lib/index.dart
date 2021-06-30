@@ -72,6 +72,11 @@ class _IndexPageState extends State<_IndexPage> {
       setState(() {
         isReading = true;
       });
+
+      /// 解码大图会耗费太多时间，这里直接把图片缩小再传过去
+      if (image.width > 1000) {
+        image.scaleDown(image.width / 1000);
+      }
       var results =
           await decodeImageInIsolate(image.buffer, image.width, image.height);
       setState(() {

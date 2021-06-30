@@ -18,21 +18,31 @@ class CameraPage extends StatefulWidget {
   State<StatefulWidget> createState() => _CameraPageState();
 }
 
-const _videoConstraints = VideoConstraints(
-  facingMode: FacingMode(
-    type: CameraType.environment,
-    constrain: Constrain.exact,
+const _videoConstraints = [
+  VideoConstraints(
+    facingMode: FacingMode(
+      type: CameraType.environment,
+      constrain: Constrain.exact,
+    ),
+    //width: VideoSize(ideal: 1920),
+    //height: VideoSize(ideal: 1080),
   ),
-  width: VideoSize(ideal: 1920, maximum: 1920),
-  height: VideoSize(ideal: 1080, maximum: 1080),
-);
+  VideoConstraints(
+    facingMode: FacingMode(
+      type: CameraType.user,
+    ),
+    //width: VideoSize(ideal: 1920),
+    //height: VideoSize(ideal: 1080),
+  ),
+];
 
 class _CameraPageState extends State<CameraPage> {
-  late CameraController _controller;
+  CameraController? _controller;
   bool _detectedCamera = false;
   bool _isCameraAvailable = false;
   bool isDetecting = false;
   late List<MediaDeviceInfo> _cameras;
+  int cameraId = 0;
 
   @override
   void initState() {
@@ -42,6 +52,7 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<void> _initializeCameraController() async {
     _cameras = await availableCameras();
+    //print(_cameras);
 
     if (_cameras.length < 1) {
       setState(() {
@@ -49,33 +60,40 @@ class _CameraPageState extends State<CameraPage> {
       });
       return;
     }
+    setCamera();
+  }
+
+  setCamera() async {
     _controller = CameraController(
       options: CameraOptions(
         audio: AudioConstraints(enabled: false),
-        deviceId: _cameras[0].deviceId,
+        video: _videoConstraints[cameraId],
+        //deviceId: _cameras[cameraId].deviceId,
       ),
     );
-    await _controller.initialize();
+    await _controller!.initialize();
     setState(() {
-      _isCameraAvailable = true;
       _detectedCamera = true;
+      _isCameraAvailable = _controller!.value.status == CameraStatus.available;
     });
-    await _play();
+    if (_isCameraAvailable) {
+      await _play();
+    }
   }
 
   Future<void> _play() async {
     if (!_isCameraAvailable) return;
-    return _controller.play();
+    return _controller!.play();
   }
 
   Future<void> _stop() async {
     if (!_isCameraAvailable) return;
-    return _controller.stop();
+    return _controller!.stop();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -85,7 +103,7 @@ class _CameraPageState extends State<CameraPage> {
       isDetecting = true;
     });
 
-    CameraImage pic = await _controller.takePicture();
+    CameraImage pic = await _controller!.takePicture();
     Uint8List imageData = Uint8List.fromList(utf8.encode(pic.data));
     ui.Image image =
         (await (await ui.instantiateImageCodec(imageData)).getNextFrame())
@@ -101,7 +119,7 @@ class _CameraPageState extends State<CameraPage> {
           pic.width,
           pic.height);
     } catch (err) {
-      error = ":${err.toString()}";
+      error = ":$err";
     }
     if (!mounted) return;
     if (results != null) {
@@ -114,6 +132,12 @@ class _CameraPageState extends State<CameraPage> {
     });
   }
 
+  changeCamera() {
+    cameraId++;
+    if (cameraId >= _cameras.length) cameraId = 0;
+    setCamera();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -124,7 +148,7 @@ class _CameraPageState extends State<CameraPage> {
         child: !_isCameraAvailable
             ? Text(_detectedCamera ? 'Not detected cameras' : 'Detecting')
             : Camera(
-                controller: _controller,
+                controller: _controller!,
                 placeholder: (_) => const SizedBox(),
                 preview: (context, preview) => Stack(
                   children: [
@@ -132,6 +156,17 @@ class _CameraPageState extends State<CameraPage> {
                       alignment: Alignment.center,
                       child: preview,
                     ),
+                    if (_cameras.length > 1)
+                      Align(
+                        alignment: Alignment(1, -1),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 60, right: 10),
+                          child: CupertinoIconButton(
+                            icon: Icon(CupertinoIcons.arrow_uturn_left_circle),
+                            onPressed: changeCamera,
+                          ),
+                        ),
+                      ),
                     Align(
                       alignment: Alignment(0, 0.7),
                       child: CupertinoIconButton(
