@@ -1,6 +1,11 @@
-# zxingweb
+# ZXing-dart Web Demo
 
-A new Flutter project.
+This is a demo project to show how to use [zxing-dart](https://gitee.com/shirne/zxing-dart) in web project.
+
+## Issues
+
+* Camera web api not work well. On the mobile device, the camera operation in the select file option can be used instead .
+* Decoding process is too slow. The positioning of this project is only a backup solution for the web side, it is not recommended to use this solution if the native side can be used
 
 ## Getting Started
 
