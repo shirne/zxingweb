@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:zxing_lib/zxing.dart';
 
 class ResultPage extends StatefulWidget {
@@ -56,11 +57,12 @@ class _ResultPageState extends State<ResultPage> {
                           ),
                           color: CupertinoColors.lightBackgroundGray,
                         ),
-                        child: Text(result.toString()),
+                        child: SelectableText(result.toString()),
                       ),
                     ],
                   ),
-                ).toList(),
+                )
+                .toList(),
           ),
         ),
       ),

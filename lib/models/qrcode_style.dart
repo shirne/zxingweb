@@ -53,7 +53,7 @@ class RRectQRCodeStyle extends QRCodeStyle {
       {Color blackColor = const Color(0xff000000),
       Color whiteColor = const Color(0xffffffff)}) async {
     BufferImage image = BufferImage(size, size);
-    await image.drawPath(
+    image.drawPath(
       Path()
         ..addRRect(RRect.fromLTRBR(0, 0, size.toDouble(), size.toDouble(),
             Radius.circular(size * 0.2))),
@@ -84,7 +84,7 @@ class RRectOutQRCodeStyle extends QRCodeStyle {
     BufferImage image = BufferImage(size, size);
     image.drawRect(
         Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()), blackColor);
-    await image.drawPath(
+    image.drawPath(
       Path()
         ..addRRect(RRect.fromLTRBR(0, 0, size.toDouble(), size.toDouble(),
             Radius.circular(size * 0.2))),
@@ -103,7 +103,7 @@ class DotQRCodeStyle extends QRCodeStyle {
       {Color blackColor = const Color(0xff000000),
       Color whiteColor = const Color(0xffffffff)}) async {
     BufferImage image = BufferImage(size, size);
-    await image.drawPath(
+    image.drawPath(
       Path()
         ..addRRect(RRect.fromLTRBR(
             0,
@@ -141,7 +141,7 @@ class DotOutQRCodeStyle extends QRCodeStyle {
     BufferImage image = BufferImage(size, size);
     image.drawRect(
         Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()), blackColor);
-    await image.drawPath(
+    image.drawPath(
       Path()
         ..addRRect(RRect.fromLTRBR(
             0,
