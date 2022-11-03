@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -54,7 +53,7 @@ class IsoMessage {
 Future<List<Result>?> decodeImageInIsolate(
     Uint8List image, int width, int height,
     {bool isRgb = true}) async {
-  if(kIsWeb){
+  if (kIsWeb) {
     return isRgb
         ? decodeImage(IsoMessage(null, image, width, height))
         : decodeCamera(IsoMessage(null, image, width, height));
@@ -74,11 +73,9 @@ Future<List<Result>?> decodeImageInIsolate(
 
   IsoMessage message = IsoMessage(port.sendPort, image, width, height);
   if (isRgb) {
-    Isolate.spawn<IsoMessage>(decodeImage, message,
-        debugName: "decodeImage");
+    Isolate.spawn<IsoMessage>(decodeImage, message, debugName: "decodeImage");
   } else {
-    Isolate.spawn<IsoMessage>(decodeCamera, message,
-        debugName: "decodeCamera");
+    Isolate.spawn<IsoMessage>(decodeCamera, message, debugName: "decodeCamera");
   }
 
   return complete.future;
@@ -108,13 +105,11 @@ List<Result>? decodeImage(IsoMessage message) {
   var pixels = List<int>.generate(
       length ~/ 4, (index) => getColorFromByte(message.byteData, index * 4));
 
-  LuminanceSource imageSource =
-      RGBLuminanceSource(message.width, message.height, pixels);
+  final imageSource = RGBLuminanceSource(message.width, message.height, pixels);
 
-  BinaryBitmap bitmap = BinaryBitmap(HybridBinarizer(imageSource));
+  final bitmap = BinaryBitmap(HybridBinarizer(imageSource));
 
-  MultipleBarcodeReader reader =
-      GenericMultipleBarcodeReader(MultiFormatReader());
+  final reader = GenericMultipleBarcodeReader(MultiFormatReader());
   try {
     print('start decode...');
     var results = reader.decodeMultiple(bitmap,
@@ -129,15 +124,12 @@ List<Result>? decodeImage(IsoMessage message) {
 }
 
 List<Result>? decodeCamera(IsoMessage message) {
-  var yuvData = Int8List.fromList(message.byteData);
+  final imageSource =
+      PlanarYUVLuminanceSource(message.byteData, message.width, message.height);
 
-  LuminanceSource imageSource =
-      PlanarYUVLuminanceSource(yuvData, message.width, message.height);
+  final bitmap = BinaryBitmap(HybridBinarizer(imageSource));
 
-  BinaryBitmap bitmap = BinaryBitmap(HybridBinarizer(imageSource));
-
-  MultipleBarcodeReader reader =
-      GenericMultipleBarcodeReader(MultiFormatReader());
+  final reader = GenericMultipleBarcodeReader(MultiFormatReader());
   try {
     var results = reader.decodeMultiple(bitmap,
         {DecodeHintType.TRY_HARDER: true, DecodeHintType.ALSO_INVERTED: true});
